@@ -6,9 +6,14 @@ thing without being led by it.
 
 Rewritten as we go. When a session reveals how a concept lands, the unit changes.
 
-**Two rules, on every unit:**
+**Three rules, on every unit:**
+- **Every concept gets a visual.** Not prose describing a visual — an actual diagram or an
+  interactive you can move. Walls of markdown are the wrong medium and they do not land.
 - **Everything ties back to language models.** A concept that stays abstract hasn't landed.
 - **Definitions get restated.** No unit assumes the previous one is still loaded in your head.
+
+**And one on pacing:** one concept per screen, in dependency order, with a visible position in
+the sequence. Jumping between points — however related they are — is the failure mode to avoid.
 
 ---
 
@@ -50,6 +55,7 @@ Each item is backed by something that actually happened. These drive the unit te
 
 | field | why |
 |---|---|
+| **Visual** | a diagram or interactive, every unit, no exceptions. Abstract prose is the wrong medium for this material and the one-concept-per-screen walkthrough in `visual/` is where it lives |
 | **Recap** | definitions restated in full (rule 2) |
 | **In a language model** | what this *is* inside an LLM — never skipped (rule 1) |
 | **Countable example** | real numbers, holdable in your head (pattern 2) |
@@ -148,6 +154,7 @@ cover their prerequisites. The one real gap on that path is unit 08.
 | file | role |
 |---|---|
 | `CURRICULUM.md` | this file — the path, and the record of how you learn |
+| `visual/maths-chain.html` | **the stepped visual walkthrough.** One concept per screen, 01–09, with a live diagram for each. [Published here](https://claude.ai/artifact/2QNgXmggaJQd6W7Ys9v6ny) |
 | `00-MATH-TLDR.md` | one-page vocabulary reference |
 | `lab/*.py` | one runnable script per concept; the referee |
 | `practice/stubs.py` | production test — write the five functions cold |

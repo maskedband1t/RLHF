@@ -1,0 +1,590 @@
+<title>Bits and Belief</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: single-column instrument panel. One concept per screen, stepped. */
+:root{
+  --bg:#eef1f5; --panel:#ffffff; --ink:#161b22; --muted:#5b6673; --line:#d2d9e2;
+  --belief:#0d7d8c;        /* what you put on things */
+  --cost:#c0561f;          /* what it costs you */
+  --floor:#6b5ca5;         /* irreducible */
+  --dead:#8a93a0;
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11151c; --panel:#191f28; --ink:#e8edf3; --muted:#9aa6b4; --line:#2b3542;
+  --belief:#3fc0cf; --cost:#f08a4b; --floor:#a797e8; --dead:#5c6675; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#11151c; --panel:#191f28; --ink:#e8edf3; --muted:#9aa6b4; --line:#2b3542;
+  --belief:#3fc0cf; --cost:#f08a4b; --floor:#a797e8; --dead:#5c6675; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;margin:0}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:0 72px}
+
+/* progress rail */
+.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);
+  padding-block:12px 10px;border-bottom:1px solid var(--line)}
+.dots{display:flex;gap:5px;align-items:center}
+.dot{flex:1;height:4px;border-radius:2px;background:var(--line);border:0;padding:0;cursor:pointer}
+.dot[aria-current="true"]{background:var(--belief)}
+.dot.seen{background:var(--muted)}
+.railtop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,8vw,40px);line-height:1.08;
+  margin:28px 0 10px;text-wrap:balance;letter-spacing:-.02em}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,6vw,30px);line-height:1.15;
+  margin:4px 0 14px;text-wrap:balance;letter-spacing:-.015em}
+h3{font-family:var(--display);font-weight:500;font-size:15px;margin:22px 0 8px;letter-spacing:.01em}
+p{margin:0 0 14px;max-width:62ch}
+.lead{font-size:19px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+b,strong{font-weight:600}
+
+.lm{border-left:3px solid var(--belief);padding:2px 0 2px 13px;margin:0 0 18px;
+  font-family:var(--display);font-weight:500;font-size:16px;line-height:1.4}
+.lm span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);font-weight:400;margin-bottom:3px}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 14px;margin:0 0 18px}
+.panel.flush{padding:14px 10px}
+figcaption{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.45}
+svg{display:block;width:100%;height:auto;overflow:visible}
+
+.trap{border:1px dashed var(--cost);border-radius:10px;padding:13px 14px;margin:0 0 18px;
+  background:color-mix(in srgb,var(--cost) 7%,transparent)}
+.trap h3{margin:0 0 7px;color:var(--cost);font-size:13px;font-family:var(--mono);
+  letter-spacing:.07em;text-transform:uppercase;font-weight:600}
+.trap p{margin:0 0 8px;font-size:16px}
+.trap p:last-child{margin:0}
+
+.ctrl{display:flex;flex-direction:column;gap:5px;margin:0 0 4px}
+.ctrl label{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+.ctrl label b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--belief);margin:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+.seg button{flex:1 1 auto;min-width:0;font-family:var(--mono);font-size:12.5px;padding:8px 6px;
+  border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--cost);border-color:var(--cost);color:#fff}
+
+.read{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.read div{flex:1 1 120px;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.read dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin:0}
+.read dd{margin:2px 0 0;font-family:var(--mono);font-size:19px;font-weight:600;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+
+.nav{display:flex;gap:10px;align-items:center;margin-top:26px}
+.nav button{font-family:var(--display);font-weight:500;font-size:16px;padding:13px 18px;
+  border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.nav button.go{flex:1;background:var(--belief);border-color:var(--belief);color:#fff;font-weight:700}
+.nav button:disabled{opacity:.35;cursor:default}
+
+code{font-family:var(--mono);font-size:.93em;background:color-mix(in srgb,var(--ink) 8%,transparent);
+  padding:1px 5px;border-radius:4px}
+.eq{font-family:var(--mono);font-size:15px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:12px 13px;margin:0 0 16px;overflow-x:auto}
+ul{margin:0 0 14px;padding-left:20px}li{margin-bottom:6px}
+.chain{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted);
+  overflow-x:auto;white-space:pre;margin:0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.b{color:var(--belief)}.c{color:var(--cost)}.f{color:var(--floor)}
+</style>
+
+<div class="rail"><div class="wrap" style="padding-block:0">
+  <div class="railtop"><span class="kicker">Bits &amp; Belief</span><span class="kicker" id="pos">1 / 10</span></div>
+  <div class="dots" id="dots"></div>
+</div></div>
+
+<div class="wrap">
+
+<!-- 0 -->
+<section id="s0">
+  <h1>Bits and Belief</h1>
+  <p class="lead">Nine ideas, in the order they depend on each other. Every one of them is an operation on a single object, and every one shows up inside a language model.</p>
+  <p>The object: <b>a belief budget.</b> 100 points to spread over what might happen. You must spend all of them.</p>
+  <figure class="panel flush"><svg viewBox="0 0 320 96" id="fig-chain" role="img" aria-label="Dependency chain of the nine concepts"></svg>
+  <figcaption>Three links carry most of the weight: the budget, softmax, cross-entropy. With those you can read an RLHF paper's loss function.</figcaption></figure>
+  <p>One screen per idea. Each screen restates what it needs, so nothing assumes you still have the last one loaded.</p>
+</section>
+
+<!-- 1 -->
+<section id="s1" hidden>
+  <span class="kicker">01</span><h2>The belief budget</h2>
+  <div class="lm"><span>in a language model</span>The output at every single word position: one belief number for each of ~100,000 words in the vocabulary. Not a metaphor — literally the array the model emits.</div>
+  <p>100 squares. Each one is a point of belief you've assigned to an outcome. Drag the slider and watch what happens to the others.</p>
+  <figure class="panel flush">
+    <div class="ctrl"><label>Belief on <span class="b">rain</span> <b id="l1">66</b></label><input type="range" id="r1" min="2" max="96" value="66"></div>
+    <svg viewBox="0 0 320 150" id="fig1" role="img" aria-label="100 belief points split across three outcomes"></svg>
+    <figcaption id="cap1"></figcaption>
+  </figure>
+  <div class="trap"><h3>The thing to notice</h3>
+  <p><b>Belief is zero-sum.</b> You cannot raise one without lowering the others. There is no "add more confidence" — only "move it from somewhere."</p>
+  <p>That single constraint is why training works the way it does. Push up the right answer and every wrong answer falls <em>automatically</em>. Nobody pushes them down by hand.</p></div>
+</section>
+
+<!-- 2 -->
+<section id="s2" hidden>
+  <span class="kicker">02</span><h2>Softmax</h2>
+  <div class="lm"><span>in a language model</span>The last operation in the network. The final layer emits raw scores; softmax turns them into next-word probabilities.</div>
+  <p>A model doesn't naturally emit numbers that sum to 1. It emits raw enthusiasm — <b>logits</b> — which can be any number at all. Softmax converts them in two steps.</p>
+  <figure class="panel flush">
+    <div class="ctrl"><label>Winner's lead over second place <b id="l2">1.0</b></label><input type="range" id="r2" min="0" max="60" value="10"></div>
+    <svg viewBox="0 0 320 210" id="fig2" role="img" aria-label="Three stages: raw score, e to the score, and the normalised probability"></svg>
+    <figcaption>Left: raw scores. Middle: each one exponentiated. Right: each divided by the middle column's total.</figcaption>
+  </figure>
+  <div class="eq" id="eq2"></div>
+  <p><b>That total is the only mystery worth clearing up.</b> It is just the sum of the middle column. Every bar gets divided by the same number, which is what forces them to add to 1. Its own size means nothing.</p>
+  <div class="trap"><h3>The gap is the confidence</h3>
+  <p>Exponentiating makes only the <b>gaps</b> matter. Scores <code>2,1,0</code> and <code>102,101,100</code> give the identical answer — try the slider at any lead and the shape only depends on the distance.</p>
+  <p>So <b>adding</b> to every logit does nothing at all. <b>Multiplying</b> them is a different story, and it has a name — next screen.</p></div>
+</section>
+
+<!-- 3 -->
+<section id="s3" hidden>
+  <span class="kicker">03</span><h2>Temperature</h2>
+  <div class="lm"><span>in a language model</span>The <code>temperature</code> knob in every API call. Same arithmetic: divide the logits by T before softmax.</div>
+  <p>One knob on the gaps, and nothing else. Divide the scores by <code>T</code> before softmax. Low T stretches the gaps apart. High T squashes them together.</p>
+  <figure class="panel flush">
+    <div class="ctrl"><label>Temperature T <b id="l3">1.00</b></label><input type="range" id="r3" min="10" max="300" value="100"></div>
+    <svg viewBox="0 0 320 170" id="fig3" role="img" aria-label="Probabilities at the chosen temperature"></svg>
+    <figcaption id="cap3"></figcaption>
+  </figure>
+  <div class="trap"><h3>What the knob really does</h3>
+  <p>T below 1 makes the model <b>bolder</b> — it commits to its favourite. T above 1 makes it <b>hedge</b> — everything gets more equal. At T→0 it always picks the top word, every time.</p>
+  <p>Nothing about the model changed. You only rescaled the gaps it had already produced.</p></div>
+</section>
+
+<!-- 4 -->
+<section id="s4" hidden>
+  <span class="kicker">04</span><h2>Entropy</h2>
+  <div class="lm"><span>in a language model</span>How unsure it is about the next word. "United States of ___" → near zero. "My favourite ___" → high.</div>
+  <p><b>Surprise</b> first, because entropy is built out of it. If something you gave little belief to happens, you're shocked. A lot of belief, barely shocked.</p>
+  <figure class="panel flush"><svg viewBox="0 0 320 185" id="fig4a" role="img" aria-label="Surprise rises steeply as belief approaches zero"></svg>
+  <figcaption>Surprise in bits, as belief goes from certain to nearly impossible. A 1-in-1000 event is about 10 bits of news.</figcaption></figure>
+  <p><b>Entropy is that surprise averaged — weighted by your own beliefs.</b> Not the worst case. What you'd pay on a typical day, if the world behaves the way you expect.</p>
+  <figure class="panel flush"><svg viewBox="0 0 320 185" id="fig4b" role="img" aria-label="Each outcome's contribution to entropy, peaking at 0.37"></svg>
+  <figcaption>What each outcome <em>contributes</em>. Peak at <span class="num">0.368</span>, not at 50%.</figcaption></figure>
+  <div class="trap"><h3>Two things that surprise people</h3>
+  <p><b>Entropy is driven by the middle of your distribution, not the top.</b> Near-certain outcomes happen constantly but carry no news. Near-impossible ones are shocking but almost never occur. The middling ones dominate.</p>
+  <p><b>And it takes one input: your beliefs.</b> It cannot see what actually happened — there's no slot to put an outcome in. It's a self-assessment you can compute before reality arrives.</p></div>
+</section>
+
+<!-- 5 -->
+<section id="s5" hidden>
+  <span class="kicker">05</span><h2>Cross-entropy</h2>
+  <div class="lm"><span>in a language model</span>The pretraining loss itself. For every position in every document: raise belief on the word that actually came next.</div>
+  <p>Reality happens. You look up how much belief you'd placed on <em>that</em> outcome, and that's the bill. Tap an outcome to make it the one that happened.</p>
+  <figure class="panel flush">
+    <div class="seg" id="seg5"></div>
+    <svg viewBox="0 0 320 175" id="fig5" role="img" aria-label="The bill depends only on the belief placed on the outcome that happened"></svg>
+    <div class="read"><div><dt>You believed</dt><dd class="b" id="o5a">—</dd></div><div><dt>Your bill</dt><dd class="c" id="o5b">—</dd></div></div>
+    <figcaption id="cap5"></figcaption>
+  </figure>
+  <div class="eq">L = − Σᵢ yᵢ · log qᵢ   →   − log q[what happened]</div>
+  <p>The truth is one-hot — <code>[1,0,0]</code> — so every term is multiplied by zero except one. The whole sum collapses to a single lookup. It's indexing wearing a summation's clothes.</p>
+  <div class="trap"><h3>The trap that cost you a prediction</h3>
+  <p><b>The loss is the bill for what happened — not the penalty for being wrong.</b> There is no notion of "wrong" anywhere in the formula. You pay every time, including when you're right. Being right just makes it cheap.</p>
+  <p>So "did the loss go up?" can't be answered until someone says <em>what happened</em>.</p>
+  <p>Also: <b>cross-entropy and "the loss" are the same number.</b> Not two layers. "Loss" is the job; cross-entropy is the thing doing it.</p></div>
+</section>
+
+<!-- 6 -->
+<section id="s6" hidden>
+  <span class="kicker">06</span><h2>KL divergence</h2>
+  <div class="lm"><span>in a language model</span>The leash in RLHF — how far the tuned model drifted from the base model. Also what DPO is algebraically derived from.</div>
+  <p>Two forecasters. <b>Alice hedges</b> 50/50. <b>Bob is sure</b> it'll be sunny. Pick a world and see what each one pays.</p>
+  <figure class="panel flush">
+    <div class="seg" id="seg6"></div>
+    <svg viewBox="0 0 320 200" id="fig6" role="img" aria-label="Each forecaster's bill split into the unavoidable floor and the wasted part"></svg>
+    <figcaption id="cap6"></figcaption>
+  </figure>
+  <div class="eq">your bill  =  <span class="f">the floor</span>  +  <span class="c">the waste</span>        KL is the waste</div>
+  <p>The <span class="f">floor</span> is reality being genuinely unpredictable. Nobody beats it — not a genius, not a supercomputer. The <span class="c">waste</span> is the only part that's your fault, and that part is KL.</p>
+  <p>Which explains two facts: <b>KL is never negative</b> (you can't waste less than nothing), and <b>KL = 0 means your beliefs match reality</b> — not that you pay nothing.</p>
+  <div class="trap"><h3>Why it isn't symmetric</h3>
+  <p>Flip between the two worlds. Same two forecasters, and the waste is <span class="num">2.33</span> versus <span class="num">0.92</span> bits. "Distance" is the wrong word for KL.</p>
+  <p><b>Being overconfident in a random world is far worse than being over-hedged in a predictable one.</b> Bob gets blindsided by rain fifty times. Alice just carries a pointless umbrella.</p>
+  <p>The rule: in <code>KL(a‖b)</code>, <b>the first slot says which world is real.</b> The second says who's guessing.</p></div>
+</section>
+
+<!-- 7 -->
+<section id="s7" hidden>
+  <span class="kicker">07</span><h2>Log-probs</h2>
+  <div class="lm"><span>in a language model</span>The <code>logprobs</code> the API returns. A whole answer's score is the <b>sum</b> of its word log-probs.</div>
+  <p>A sentence is a chain of guesses, so its probability is all of them <b>multiplied</b>. Six words is fine. Five hundred is a catastrophe.</p>
+  <figure class="panel flush">
+    <div class="ctrl"><label>Answer length, in words <b id="l7">80</b></label><input type="range" id="r7" min="1" max="600" value="80"></div>
+    <svg viewBox="0 0 320 205" id="fig7" role="img" aria-label="The multiplied probability falls through the smallest storable number while the sum of logs stays ordinary"></svg>
+    <figcaption id="cap7"></figcaption>
+  </figure>
+  <div class="read"><div><dt>Multiplied</dt><dd class="c" id="o7a">—</dd></div><div><dt>Sum of logs</dt><dd class="b" id="o7b">—</dd></div></div>
+  <p>Past about <b>237 words</b> the multiplied value drops below the smallest number a computer can hold and silently becomes <b>exactly 0.0</b>. Not small — zero. And the slope of zero is zero, so every training nudge becomes zero. Learning stops dead, with no error message.</p>
+  <div class="eq">log(a × b) = log(a) + log(b)</div>
+  <p>That one school rule is doing all the work. <b>Logs turn multiplying into adding.</b> Multiplying drives you off a cliff; adding never falls off anything.</p>
+  <div class="trap"><h3>Reading the scale</h3>
+  <p>A log-prob is <b>not a different kind of probability</b> — it's the same belief relabelled, like km and miles. And a negative log-prob is <b>not a negative probability</b>; logs of numbers under 1 are simply negative.</p>
+  <p><code>0</code> is perfect. <code>−1</code> is a belief of 0.5. More negative is worse.</p>
+  <p>And you've met this quantity already: <b><code>−log(p)</code> is surprise</b> — the exact thing you averaged to get entropy. One idea, three names, and papers use all three.</p></div>
+</section>
+
+<!-- 8 -->
+<section id="s8" hidden>
+  <span class="kicker">08</span><h2>Policy gradient</h2>
+  <div class="lm"><span>in a language model</span>How RLHF actually updates the weights. Sample an answer, score it, raise the log-probability of the words in answers that scored above average.</div>
+  <p>Three buttons paying <span class="num">10</span>, <span class="num">9.5</span>, <span class="num">9</span>. Slide the payouts up and down — it changes nothing about which button is best.</p>
+  <figure class="panel flush">
+    <div class="ctrl"><label>Add to every payout <b id="l8">0</b></label><input type="range" id="r8" min="0" max="100" value="0"></div>
+    <svg viewBox="0 0 320 190" id="fig8" role="img" aria-label="Raw reward pushes every option up; advantage produces a signed signal"></svg>
+    <figcaption id="cap8"></figcaption>
+  </figure>
+  <p><b>Left column is broken and the slider shows why.</b> Every button gets shoved up — but belief is zero-sum, so "everything up" can't happen. What survives is whichever button got sampled most, and early on that's luck. It's learning from noise.</p>
+  <p><b>Right column subtracts the average first.</b> Now the signal is <b>signed</b>: up, leave, down. And it's identical no matter where you slide the payouts, because it only ever sees differences.</p>
+  <div class="eq">θ ← θ + lr · advantage · ∇<sub>θ</sub> log π<sub>θ</sub>(action)</div>
+  <p>Read it as: <em>nudge the numbers in whichever direction raises the log-probability of what I did, scaled by how much better than usual it turned out.</em> That <code>log</code> is screen 07.</p>
+  <div class="trap"><h3>A correction kept on purpose</h3>
+  <p>The first version of this claimed the baseline makes learning <b>faster</b>. The script said the opposite: raw rewards of ~10 act like a 20× bigger learning rate, so they move faster — sometimes confidently to the <b>wrong</b> button, on 6 of 12 random seeds.</p>
+  <p>It isn't a speed trick. It buys <b>invariance</b> and <b>lower variance</b>. "Faster" and "better" are different axes.</p>
+  <p>"Better than usual" is a real signal. "Good" is not. One subtraction, three names: <b>baseline</b>, <b>advantage</b>, <code>A = r − V(s)</code>. <b>GRPO</b> is just using a group of samples' own mean as that baseline — which is why it needs no value network.</p></div>
+</section>
+
+<!-- 9 -->
+<section id="s9" hidden>
+  <span class="kicker">09</span><h2>Calibration</h2>
+  <div class="lm"><span>in a language model</span>When it says 90%, is it right 9 times in 10? The hallucination question — and the hand-off question.</div>
+  <p>Entropy only looks at the model's beliefs. The bill only arrives after reality does. <b>They come apart exactly when the model is confidently wrong.</b></p>
+  <figure class="panel flush"><svg viewBox="0 0 320 215" id="fig9" role="img" aria-label="Stated confidence against measured accuracy, illustrative"></svg>
+  <figcaption>Illustrative, not measured. The diagonal is perfect calibration: everything the model calls 70% comes true 70% of the time.</figcaption></figure>
+  <p>A model below the line is <b>overconfident</b> — the dangerous direction. It says 95% and is right 70% of the time. Its entropy is low, so by its own reckoning it's doing great.</p>
+  <div class="trap"><h3>Why this is the one that matters to you</h3>
+  <p>A hand-off decision isn't dangerous when the model is <em>uncertain</em> — uncertainty is visible and you can act on it. It's dangerous when the model is <b>certain and wrong</b>.</p>
+  <p><b>Entropy cannot detect that.</b> It has one input and reality isn't it. Only comparing stated confidence against measured outcomes can — which is this chart, and nothing else.</p></div>
+</section>
+
+<div class="nav">
+  <button id="back" type="button">Back</button>
+  <button id="next" type="button" class="go">Next</button>
+</div>
+</div>
+
+<script>
+(function(){
+var N=10, cur=0;
+var css=function(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()};
+var SV='http://www.w3.org/2000/svg';
+function E(t,a){var e=document.createElementNS(SV,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+function T(x,y,s,o){var e=E('text',{x:x,y:y});e.textContent=s;for(var k in (o||{}))e.setAttribute(k,o[k]);return e}
+function clr(id){var s=document.getElementById(id);while(s.firstChild)s.removeChild(s.firstChild);return s}
+function mono(sz,fill,anch){return{'font-family':'IBM Plex Mono, monospace','font-size':sz,fill:fill||css('--muted'),'text-anchor':anch||'start'}}
+function sm(sc,t){t=t||1;var m=Math.max.apply(null,sc.map(function(x){return x/t}));
+  var e=sc.map(function(x){return Math.exp(x/t-m)});var s=e.reduce(function(a,b){return a+b},0);
+  return e.map(function(x){return x/s})}
+function H(p){return -p.reduce(function(a,x){return a+(x>0?x*Math.log2(x):0)},0)}
+function KL(p,q){return p.reduce(function(a,x,i){return a+(x>0?x*Math.log2(x/q[i]):0)},0)}
+
+/* ---- step 0: dependency chain ---- */
+function chain(){var s=clr('fig-chain'),L=css('--line'),M=css('--muted'),B=css('--belief');
+ var box=function(x,y,w,lab,hot){
+   s.appendChild(E('rect',{x:x,y:y,width:w,height:20,rx:5,fill:hot?B:'none',
+     stroke:hot?B:L,'stroke-width':1}));
+   s.appendChild(T(x+w/2,y+14,lab,mono(9.5,hot?css('--panel'):M,'middle')));};
+ var arr=function(x1,y1,x2,y2){s.appendChild(E('path',{d:'M'+x1+' '+y1+'L'+x2+' '+y2,
+   stroke:L,'stroke-width':1.2,fill:'none'}))};
+ box(2,4,54,'01 budget',1);   arr(58,14,70,14);
+ box(70,4,56,'02 softmax',1); arr(128,14,140,14);
+ box(140,4,70,'03 temp',0);
+ arr(98,24,98,36);
+ box(70,38,58,'04 entropy',0); arr(130,48,142,48);
+ box(142,38,74,'05 cross-ent',1); arr(218,48,230,48);
+ box(230,38,48,'06 KL',0);
+ arr(98,58,98,70);
+ box(56,72,66,'07 log-prob',0); arr(124,82,136,82);
+ box(136,72,70,'08 pol.grad',0); arr(208,82,220,82);
+ box(220,72,78,'09 calibr.',0);
+ arr(179,58,179,72);
+ s.appendChild(T(2,94,'filled = the three that carry the weight',mono(8.5)));
+}
+
+/* ---- 01 budget ---- */
+function f1(){var v=+document.getElementById('r1').value;
+ document.getElementById('l1').textContent=v;
+ var rest=100-v, b=Math.round(rest*0.73), c=100-v-b;
+ var p=[v,b,c], names=['rain','cloud','sun'];
+ var cols=[css('--belief'),css('--floor'),css('--cost')];
+ var s=clr('fig1'), i, idx=0, assign=[];
+ for(i=0;i<3;i++){for(var j=0;j<p[i];j++)assign.push(i)}
+ for(i=0;i<100;i++){var r=Math.floor(i/10),q=i%10;
+  s.appendChild(E('rect',{x:q*15+2,y:r*10.6+2,width:12.4,height:8.2,rx:1.6,
+   fill:cols[assign[i]]||css('--line')}))}
+ var y=124;
+ for(i=0;i<3;i++){s.appendChild(E('rect',{x:160+i*54,y:y,width:11,height:11,rx:2,fill:cols[i]}));
+  s.appendChild(T(175+i*54,y+9.5,names[i]+' '+p[i],mono(10,css('--ink'))))}
+ s.appendChild(T(2,y+9.5,'total 100',mono(10.5,css('--ink'))));
+ document.getElementById('cap1').textContent=
+  'rain '+p[0]+'  ·  cloud '+p[1]+'  ·  sun '+p[2]+'  —  always 100, never 99 or 101.';
+}
+
+/* ---- 02 softmax ---- */
+function f2(){var g=+document.getElementById('r2').value/10;
+ document.getElementById('l2').textContent=g.toFixed(1);
+ var sc=[g,0,-g*0.45], ex=sc.map(Math.exp), tot=ex.reduce(function(a,b){return a+b},0);
+ var p=ex.map(function(x){return x/tot});
+ var s=clr('fig2'),cols=[css('--belief'),css('--floor'),css('--cost')],L=css('--line');
+ var hdr=['score','e^score','probability'],cx=[48,152,264];
+ for(var h=0;h<3;h++)s.appendChild(T(cx[h],12,hdr[h],mono(10,css('--muted'),'middle')));
+ var maxe=Math.max.apply(null,ex);
+ for(var i=0;i<3;i++){var y=28+i*58;
+  var w1=Math.abs(sc[i])*9+1;
+  s.appendChild(E('rect',{x:sc[i]<0?48-w1:48,y:y,width:w1,height:17,rx:2.5,fill:cols[i],opacity:.55}));
+  s.appendChild(T(48,y+33,sc[i].toFixed(2),mono(11,css('--ink'),'middle')));
+  var w2=ex[i]/maxe*76+2;
+  s.appendChild(E('rect',{x:114,y:y,width:w2,height:17,rx:2.5,fill:cols[i],opacity:.75}));
+  s.appendChild(T(152,y+33,ex[i].toFixed(2),mono(11,css('--ink'),'middle')));
+  var w3=p[i]*86+2;
+  s.appendChild(E('rect',{x:222,y:y,width:w3,height:17,rx:2.5,fill:cols[i]}));
+  s.appendChild(T(264,y+33,(p[i]*100).toFixed(1)+'%',mono(11,css('--ink'),'middle')));
+ }
+ s.appendChild(E('path',{d:'M114 198 L190 198',stroke:L,'stroke-width':1}));
+ s.appendChild(T(152,194,'total '+tot.toFixed(2),mono(10,css('--cost'),'middle')));
+ s.appendChild(T(264,194,'sums to '+p.reduce(function(a,b){return a+b},0).toFixed(2),
+   mono(10,css('--belief'),'middle')));
+ document.getElementById('eq2').textContent=
+  ex[0].toFixed(2)+' ÷ '+tot.toFixed(2)+' = '+p[0].toFixed(3)+'    ← that total is the whole trick';
+}
+
+/* ---- 03 temperature ---- */
+function f3(){var t=+document.getElementById('r3').value/100;
+ document.getElementById('l3').textContent=t.toFixed(2);
+ var p=sm([2,1,0],t), s=clr('fig3');
+ var cols=[css('--belief'),css('--floor'),css('--cost')],names=['rain','cloud','sun'];
+ for(var i=0;i<3;i++){var x=22+i*98;
+  var h=p[i]*108;
+  s.appendChild(E('rect',{x:x,y:124-h,width:64,height:h,rx:3,fill:cols[i]}));
+  s.appendChild(T(x+32,140,names[i],mono(10.5,css('--muted'),'middle')));
+  s.appendChild(T(x+32,118-h,(p[i]*100).toFixed(1)+'%',mono(11,css('--ink'),'middle')));
+ }
+ s.appendChild(E('path',{d:'M14 124 L306 124',stroke:css('--line'),'stroke-width':1}));
+ s.appendChild(T(14,160,'scores stay [2, 1, 0] the whole time — only T moves',mono(9.5)));
+ var d=t<0.7?'bolder — committing to the favourite':t>1.4?'hedged — everything closer to equal':'near the raw scores';
+ document.getElementById('cap3').textContent='T = '+t.toFixed(2)+' → '+d+'. Entropy '+H(p).toFixed(3)+' bits of a possible 1.585.';
+}
+
+/* ---- 04 surprise + contribution curves ---- */
+function axes(s,x0,y0,w,h,xl,yl){var L=css('--line');
+ s.appendChild(E('path',{d:'M'+x0+' '+y0+'L'+(x0+w)+' '+y0,stroke:L,'stroke-width':1}));
+ s.appendChild(E('path',{d:'M'+x0+' '+y0+'L'+x0+' '+(y0-h),stroke:L,'stroke-width':1}));
+ s.appendChild(T(x0+w,y0+16,xl,mono(9.5,css('--muted'),'end')));
+ s.appendChild(T(x0-4,y0-h-6,yl,mono(9.5)));
+}
+function f4(){
+ var s=clr('fig4a'),x0=34,y0=148,w=262,h=124;
+ axes(s,x0,y0,w,h,'belief you placed','surprise (bits)');
+ var d='',i;
+ for(i=1;i<=100;i++){var p=i/100,su=Math.min(Math.log2(1/p),7);
+  d+=(i===1?'M':'L')+(x0+p*w)+' '+(y0-su/7*h)}
+ s.appendChild(E('path',{d:d,stroke:css('--cost'),'stroke-width':2.2,fill:'none'}));
+ [[0.01,'1%'],[0.1,'10%'],[0.5,'50%'],[1,'100%']].forEach(function(t){
+  s.appendChild(T(x0+t[0]*w,y0+14,t[1],mono(9,css('--muted'),'middle')))});
+ [0,2,4,6].forEach(function(v){s.appendChild(T(x0-6,y0-v/7*h+3,v+'',mono(9,css('--muted'),'end')))});
+ var pts=[[0.9,'barely news'],[0.1,'3.3 bits'],[0.02,'5.6 bits']];
+ pts.forEach(function(q){var su=Math.min(Math.log2(1/q[0]),7);
+  s.appendChild(E('circle',{cx:x0+q[0]*w,cy:y0-su/7*h,r:3,fill:css('--cost')}));
+  s.appendChild(T(x0+q[0]*w+(q[0]>0.5?-6:7),y0-su/7*h-7,q[1],mono(9,css('--ink'),q[0]>0.5?'end':'start')))});
+
+ s=clr('fig4b');y0=148;
+ axes(s,x0,y0,w,h,'belief you placed','contribution');
+ var mx=1/Math.E*Math.log2(Math.E);d='';
+ for(i=1;i<=100;i++){var p2=i/100,c=p2*Math.log2(1/p2);
+  d+=(i===1?'M':'L')+(x0+p2*w)+' '+(y0-c/mx*h*0.92)}
+ s.appendChild(E('path',{d:d,stroke:css('--belief'),'stroke-width':2.2,fill:'none'}));
+ var px=x0+(1/Math.E)*w;
+ s.appendChild(E('path',{d:'M'+px+' '+y0+'L'+px+' '+(y0-h*0.92),stroke:css('--belief'),
+  'stroke-width':1,'stroke-dasharray':'3 3',opacity:.6}));
+ s.appendChild(T(px+6,y0-h*0.92+10,'peak at 0.368 = 1/e',mono(9.5,css('--belief'))));
+ s.appendChild(T(x0+0.5*w,y0-0.5*h*0.92-14,'not here',mono(9,css('--muted'),'middle')));
+ s.appendChild(E('circle',{cx:x0+0.5*w,cy:y0-(0.5*Math.log2(2))/mx*h*0.92,r:2.5,fill:css('--muted')}));
+ [[0.05,'5%'],[0.37,'37%'],[0.7,'70%'],[1,'100%']].forEach(function(t){
+  s.appendChild(T(x0+t[0]*w,y0+14,t[1],mono(9,css('--muted'),'middle')))});
+}
+
+/* ---- 05 cross-entropy ---- */
+var w5=0;
+function f5(){var p=[0.665,0.245,0.090],names=['rain','cloud','sun'];
+ var seg=document.getElementById('seg5');
+ if(!seg.firstChild){names.forEach(function(n,i){var b=document.createElement('button');
+  b.type='button';b.textContent=n+' happened';b.onclick=function(){w5=i;f5()};seg.appendChild(b)})}
+ [].forEach.call(seg.children,function(b,i){b.setAttribute('aria-pressed',i===w5?'true':'false')});
+ var s=clr('fig5'),cols=[css('--belief'),css('--floor'),css('--cost')];
+ for(var i=0;i<3;i++){var x=24+i*96,h=p[i]*104,on=(i===w5);
+  s.appendChild(E('rect',{x:x,y:120-h,width:62,height:h,rx:3,fill:on?css('--cost'):cols[i],
+   opacity:on?1:0.28}));
+  s.appendChild(T(x+31,136,names[i],mono(10.5,on?css('--ink'):css('--muted'),'middle')));
+  s.appendChild(T(x+31,114-h,(p[i]*100).toFixed(1)+'%',mono(10.5,on?css('--ink'):css('--muted'),'middle')));
+  if(on)s.appendChild(T(x+31,152,'↑ this one',mono(9.5,css('--cost'),'middle')));
+ }
+ s.appendChild(E('path',{d:'M16 120 L304 120',stroke:css('--line'),'stroke-width':1}));
+ s.appendChild(T(16,168,'the other two bars played no part in the bill',mono(9.5)));
+ document.getElementById('o5a').textContent=(p[w5]*100).toFixed(1)+'%';
+ document.getElementById('o5b').textContent=(-Math.log2(p[w5])).toFixed(3)+' bits';
+ document.getElementById('cap5').textContent=
+  'Only one number mattered: the belief you had on '+names[w5]+'. Entropy of this whole budget is '
+  +H(p).toFixed(3)+' bits — which is the average of the three possible bills.';
+}
+
+/* ---- 06 KL ---- */
+var w6=0;
+function f6(){
+ var worlds=[{n:'coin-flip weather',p:[0.5,0.5]},{n:'desert',p:[0.01,0.99]}];
+ var people=[{n:'Alice  hedges 50/50',b:[0.5,0.5]},{n:'Bob  sure it is sunny',b:[0.01,0.99]}];
+ var seg=document.getElementById('seg6');
+ if(!seg.firstChild){worlds.forEach(function(wd,i){var b=document.createElement('button');
+  b.type='button';b.textContent=wd.n;b.onclick=function(){w6=i;f6()};seg.appendChild(b)})}
+ [].forEach.call(seg.children,function(b,i){b.setAttribute('aria-pressed',i===w6?'true':'false')});
+ var W=worlds[w6].p, floor=H(W), s=clr('fig6');
+ var mx=3.6, sc=128/mx;
+ s.appendChild(T(10,13,'world: '+worlds[w6].n+'   ·   rain '+(W[0]*100).toFixed(0)+'% / sun '+(W[1]*100).toFixed(0)+'%',
+   mono(10,css('--ink'))));
+ people.forEach(function(pe,i){
+  var k=KL(W,pe.b), paid=floor+k, x=46+i*132;
+  s.appendChild(E('rect',{x:x,y:150-floor*sc,width:76,height:floor*sc,rx:2,fill:css('--floor')}));
+  s.appendChild(E('rect',{x:x,y:150-paid*sc,width:76,height:k*sc,rx:2,fill:css('--cost')}));
+  s.appendChild(T(x+38,166,pe.n.split('  ')[0],mono(11,css('--ink'),'middle')));
+  s.appendChild(T(x+38,179,pe.n.split('  ')[1],mono(9,css('--muted'),'middle')));
+  s.appendChild(T(x+38,144-paid*sc,paid.toFixed(2)+' bits/day',mono(10,css('--ink'),'middle')));
+  if(k*sc>13)s.appendChild(T(x+38,150-floor*sc-k*sc/2+4,'waste '+k.toFixed(2),mono(9,'#fff','middle')));
+  else if(k>0.001)s.appendChild(T(x+82,150-floor*sc-k*sc/2+3,'waste '+k.toFixed(2),mono(9,css('--cost'))));
+  if(floor*sc>13)s.appendChild(T(x+38,150-floor*sc/2+4,'floor',mono(9,'#fff','middle')));
+ });
+ s.appendChild(E('path',{d:'M38 150 L306 150',stroke:css('--line'),'stroke-width':1}));
+ s.appendChild(E('rect',{x:10,y:24,width:9,height:9,rx:2,fill:css('--floor')}));
+ s.appendChild(T(23,32,'floor — nobody beats it',mono(9)));
+ s.appendChild(E('rect',{x:160,y:24,width:9,height:9,rx:2,fill:css('--cost')}));
+ s.appendChild(T(173,32,'waste — this is KL',mono(9)));
+ var kA=KL(W,[0.5,0.5]),kB=KL(W,[0.01,0.99]);
+ document.getElementById('cap6').textContent=
+  (kA<kB?'Alice':'Bob')+' is right in this world and wastes nothing. '+
+  (kA<kB?'Bob':'Alice')+' wastes '+Math.max(kA,kB).toFixed(3)+' bits a day. Switch worlds — same two people, very different waste.';
+}
+
+/* ---- 07 underflow ---- */
+function f7(){var n=+document.getElementById('r7').value;
+ document.getElementById('l7').textContent=n;
+ var per=Math.log10(0.05), lim=-308, cliff=Math.round(-lim/-per);
+ var s=clr('fig7'),x0=40,y0=150,w=258,h=122, maxn=600, lo=-400;
+ axes(s,x0,y0,w,h,'words in the answer','log₁₀ of the value');
+ s.appendChild(E('rect',{x:x0,y:y0-(lim-lo)/(0-lo)*h,width:w,
+   height:(lim-lo)/(0-lo)*h,fill:css('--dead'),opacity:.22}));
+ s.appendChild(T(x0+w-4,y0-10,'below here a float is exactly 0.0',mono(8.5,css('--dead'),'end')));
+ var d='',i;
+ for(i=0;i<=maxn;i+=4){var v=Math.max(i*per,lo);
+  d+=(i===0?'M':'L')+(x0+i/maxn*w)+' '+(y0-(v-lo)/(0-lo)*h)}
+ s.appendChild(E('path',{d:d,stroke:css('--cost'),'stroke-width':2.2,fill:'none'}));
+ var cx=x0+cliff/maxn*w;
+ s.appendChild(E('path',{d:'M'+cx+' '+y0+'L'+cx+' '+(y0-h),stroke:css('--cost'),
+   'stroke-width':1,'stroke-dasharray':'3 3'}));
+ s.appendChild(T(cx+5,y0-h+11,cliff+' words → dead',mono(9.5,css('--cost'))));
+ var d2='';
+ for(i=0;i<=maxn;i+=4){var lg=i*Math.log2(0.05)/9;
+  d2+=(i===0?'M':'L')+(x0+i/maxn*w)+' '+(y0-(Math.max(lg,lo)-lo)/(0-lo)*h)}
+ s.appendChild(E('path',{d:d2,stroke:css('--belief'),'stroke-width':2.2,fill:'none'}));
+ s.appendChild(T(x0+w-4,y0-h+26,'sum of logs — ordinary numbers',mono(9,css('--belief'),'end')));
+ var mk=x0+n/maxn*w;
+ s.appendChild(E('path',{d:'M'+mk+' '+(y0+5)+'L'+mk+' '+(y0-h),stroke:css('--ink'),
+   'stroke-width':1.4,opacity:.5}));
+ [0,200,400,600].forEach(function(v){
+  s.appendChild(T(x0+v/maxn*w,y0+15,v+'',mono(9,css('--muted'),'middle')))});
+ var prod=Math.pow(0.05,n);
+ document.getElementById('o7a').textContent= prod===0?'0.0  (dead)':('1e'+(n*per).toFixed(0));
+ document.getElementById('o7b').textContent=(n*Math.log(0.05)).toFixed(1);
+ document.getElementById('cap7').textContent= n<cliff
+  ? n+' words: still storable, but heading for the cliff at '+cliff+'.'
+  : n+' words: multiplying gives exactly 0.0, and every gradient from 0.0 is 0.0. The log version is '+(n*Math.log(0.05)).toFixed(0)+' — completely fine.';
+}
+
+/* ---- 08 advantage ---- */
+function f8(){var add=+document.getElementById('r8').value;
+ document.getElementById('l8').textContent=add;
+ var pay=[10+add,9.5+add,9+add], mean=(pay[0]+pay[1]+pay[2])/3;
+ var s=clr('fig8'),names=['A','B','C'];
+ s.appendChild(T(84,13,'no baseline',mono(10.5,css('--cost'),'middle')));
+ s.appendChild(T(236,13,'minus the average',mono(10.5,css('--belief'),'middle')));
+ var mxRaw=Math.max.apply(null,pay);
+ for(var i=0;i<3;i++){var y=34+i*46;
+  s.appendChild(T(14,y+22,names[i],mono(13,css('--ink'))));
+  s.appendChild(T(30,y+22,pay[i].toFixed(1),mono(10,css('--muted'))));
+  var wr=pay[i]/mxRaw*62;
+  s.appendChild(E('rect',{x:66,y:y+8,width:wr,height:15,rx:2.5,fill:css('--cost'),opacity:.8}));
+  s.appendChild(T(66+wr+4,y+20,'↑ up',mono(9,css('--cost'))));
+  var a=pay[i]-mean, zx=236;
+  var wa=Math.abs(a)/0.5*42;
+  s.appendChild(E('path',{d:'M'+zx+' '+(y+4)+'L'+zx+' '+(y+28),stroke:css('--line'),'stroke-width':1}));
+  if(Math.abs(a)>0.001){
+   s.appendChild(E('rect',{x:a>0?zx:zx-wa,y:y+8,width:wa,height:15,rx:2.5,fill:css('--belief')}));
+   s.appendChild(T(a>0?zx+wa+4:zx-wa-4,y+20,(a>0?'+':'')+a.toFixed(1)+(a>0?' ↑':' ↓'),
+     mono(9,css('--belief'),a>0?'start':'end')));
+  } else s.appendChild(T(zx+6,y+20,'0.0  leave',mono(9,css('--muted'))));
+ }
+ s.appendChild(T(14,182,'slide the payouts: the right column never changes',mono(9.5)));
+ document.getElementById('cap8').textContent='Payouts '+pay[0].toFixed(1)+' / '+pay[1].toFixed(1)+' / '+pay[2].toFixed(1)
+  +'. Advantage is always +0.5 / 0.0 / −0.5 — it only ever sees differences.';
+}
+
+/* ---- 09 calibration ---- */
+function f9(){var s=clr('fig9'),x0=42,y0=168,w=248,h=138;
+ axes(s,x0,y0,w,h,'model says','actually right');
+ s.appendChild(E('path',{d:'M'+x0+' '+y0+'L'+(x0+w)+' '+(y0-h),stroke:css('--line'),
+  'stroke-width':1.4,'stroke-dasharray':'4 4'}));
+ s.appendChild(T(x0+w-6,y0-h+14,'perfect',mono(9,css('--muted'),'end')));
+ var over=[[0.5,0.44],[0.6,0.5],[0.7,0.56],[0.8,0.63],[0.9,0.68],[0.95,0.71]];
+ var good=[[0.5,0.52],[0.6,0.58],[0.7,0.71],[0.8,0.79],[0.9,0.88],[0.95,0.93]];
+ function line(pts,col,lab,dy){var d='';
+  pts.forEach(function(q,i){d+=(i?'L':'M')+(x0+q[0]*w)+' '+(y0-q[1]*h)});
+  s.appendChild(E('path',{d:d,stroke:col,'stroke-width':2.2,fill:'none'}));
+  pts.forEach(function(q){s.appendChild(E('circle',{cx:x0+q[0]*w,cy:y0-q[1]*h,r:3,fill:col}))});
+  var last=pts[pts.length-1];
+  s.appendChild(T(x0+last[0]*w-4,y0-last[1]*h+dy,lab,mono(9.5,col,'end')));}
+ line(good,css('--belief'),'well calibrated',-9);
+ line(over,css('--cost'),'overconfident',16);
+ [[0.5,'50%'],[0.7,'70%'],[0.9,'90%']].forEach(function(t){
+  s.appendChild(T(x0+t[0]*w,y0+15,t[1],mono(9,css('--muted'),'middle')))});
+ [[0.5,'50%'],[1,'100%']].forEach(function(t){
+  s.appendChild(T(x0-6,y0-t[0]*h+3,t[1],mono(9,css('--muted'),'end')))});
+ s.appendChild(E('path',{d:'M'+(x0+0.9*w)+' '+(y0-0.88*h)+'L'+(x0+0.9*w)+' '+(y0-0.68*h),
+  stroke:css('--cost'),'stroke-width':1,'stroke-dasharray':'2 2'}));
+ s.appendChild(T(x0+0.9*w-5,y0-0.78*h+3,'the gap',mono(8.5,css('--cost'),'end')));
+}
+
+var draws=[chain,f1,f2,f3,f4,f5,f6,f7,f8,f9];
+
+/* ---- stepper ---- */
+var dots=document.getElementById('dots');
+for(var i=0;i<N;i++){(function(k){var b=document.createElement('button');
+ b.className='dot';b.type='button';b.setAttribute('aria-label','Step '+(k+1));
+ b.onclick=function(){go(k)};dots.appendChild(b)})(i)}
+function go(k,noscroll){
+ cur=Math.max(0,Math.min(N-1,k));
+ for(var i=0;i<N;i++){var el=document.getElementById('s'+i);if(el)el.hidden=(i!==cur)}
+ [].forEach.call(dots.children,function(b,i){
+  b.setAttribute('aria-current',i===cur?'true':'false');
+  if(i<cur)b.classList.add('seen');else b.classList.remove('seen')});
+ document.getElementById('pos').textContent=(cur+1)+' / '+N;
+ document.getElementById('back').disabled=(cur===0);
+ var nx=document.getElementById('next');
+ nx.textContent=cur===N-1?'Start again':'Next';
+ try{draws[cur]()}catch(e){}
+ if(!noscroll)window.scrollTo(0,0);
+}
+document.getElementById('next').onclick=function(){go(cur===N-1?0:cur+1)};
+document.getElementById('back').onclick=function(){go(cur-1)};
+['r1','r2','r3','r7','r8'].forEach(function(id){var el=document.getElementById(id);
+ if(el)el.addEventListener('input',function(){draws[cur]()})});
+if(window.matchMedia)try{window.matchMedia('(prefers-color-scheme:dark)')
+ .addEventListener('change',function(){draws[cur]()})}catch(e){}
+go(0,true);
+})();
+</script>
