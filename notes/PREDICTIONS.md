@@ -9,6 +9,38 @@ means I'm not predicting hard enough.
 
 ---
 
+### 2026-10-12 · entropy & loss for `[3,1,0]`, before running `lab/04` and `lab/05`
+*Reasoned aloud on a phone; scribed by Claude, wording checked back.*
+
+**Predicted:** two parts.
+- *Entropy:* goes down — "more likely that it's rain, so the model's willingness to get
+  surprised goes down."
+- *Loss (if rain happens):* goes **up** — "the loss is what happens when you're wrong... you're
+  even more certain that it's rain."
+
+**Actual:**
+- Entropy `1.2009 → 0.7564` bits. **Down 37%.**
+- Loss if rain `0.5881 → 0.2450` bits. **Down.** Loss if cloud or sun: `+1.0997` each.
+
+**Score:** entropy **HIT** · loss **MISS**.
+
+**Learned:** The loss is **the bill for what happened, not the penalty for being wrong.** There
+is no notion of "wrong" anywhere in cross-entropy — you look up the belief you placed on the
+event reality delivered, and that is the whole calculation. You pay a bill every time, including
+when you're right; being right just makes it cheap. So "did the loss go up?" is unanswerable
+until someone says what happened.
+
+Second half of it: the *reasoning* was actually correct and landed on the wrong row. "You're
+going to be more surprised when it's **not** rain" is exactly the `+1.0997` on cloud and sun.
+Right mechanism, wrong question — which is the pattern to watch for (see `CURRICULUM.md`,
+pattern 4).
+
+Third: getting more confident is a **bet**. `−0.34` on rain bought at the price of `+1.10` on
+each of the others. Forced, because the budget sums to 1 — you can't buy cheaper rain without
+selling expensive cloud.
+
+---
+
 ### 2026-10-08 · softmax, before running `lab/02`
 **Predicted:** scores `[2,1,0]` → roughly `[0.6, 0.3, 0.1]`.
 **Actual:** `[0.665, 0.245, 0.090]`.

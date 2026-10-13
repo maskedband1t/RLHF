@@ -35,6 +35,42 @@ exists in its current form because my first explanation of `advantage` was contr
 the script's own numbers. That correction is kept in the file. Expect more of them —
 and push back when something I say doesn't sit right. The script is the referee, not me.
 
+
+## Two modes: phone and keyboard
+
+Added 2026-10-12, after discovering the plan assumed a keyboard that isn't always there.
+
+**🎧 Phone / voice — learn and argue.** Lectures, prediction drills, Feynman checks, term
+dumps, your-own-words TLDRs. Five of the seven loop steps above are phone-legal: 1 (guess),
+2 (watch), 3 (dump terms), 4 (your TLDR), 7 (Feynman), plus the *prediction* half of 6.
+
+**💻 Computer — build and verify.** `practice/stubs.py`, running `lab/` scripts to check my
+numbers, writing the formula tables in `reason/`, committing.
+
+Neither track blocks the other. The old plan had the keyboard-only harness sitting in front of
+Lecture 1, which is pure listening — that was a sequencing bug, not discipline.
+
+**Amendment to the division of labour.** The rule above gives you the predictions and TLDRs. In
+voice mode the *substance* stays yours — your words, your reasoning, your guess — and the
+**typing becomes mine.** I'm the scribe, not the author. If something I log back doesn't sound
+like you said it, say so: a TLDR in my phrasing is worthless by your own rule.
+
+**The honest cost of voice mode.** I run the scripts and read you the numbers, so the referee
+is me-with-props rather than the output itself. Two mitigations: the numbers stay in the
+transcript, and the computer track includes re-running the labs to spot-check me. A number I
+read you that turns out wrong is a MISS in *my* column and gets logged the same as yours.
+
+## Two standing rules for explanations
+
+Added 2026-10-12, at your request.
+
+1. **Tie everything back to language models.** A concept that stays abstract hasn't landed.
+   Entropy isn't "spread of a distribution", it's *how unsure the model is about the next word*.
+2. **Restate the definitions every time.** No explanation assumes the previous one is still
+   loaded. Recap first, then the new thing.
+
+Both are now required fields in the `CURRICULUM.md` unit template.
+
 ## Starting a new session
 
 I don't carry memory between sessions. To get me up to speed in one line, paste:

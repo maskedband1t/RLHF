@@ -18,6 +18,7 @@ understand something.
 
 | | |
 |---|---|
+| **[CURRICULUM.md](CURRICULUM.md)** | Our own path through the book, built from how you actually learn, mapped to the real chapters and lectures. **Start here.** |
 | **[00-MATH-TLDR.md](00-MATH-TLDR.md)** | The entire maths vocabulary on one page, plus a notation decoder ring. **Read this first.** |
 | **[reason/00-HOW-WE-WORK.md](reason/00-HOW-WE-WORK.md)** | The loop we run per chapter, and the division of labour. |
 | **[practice/](practice/)** | Implement the five core functions yourself. Self-checking — 24 tests, hints on every failure. |
@@ -65,15 +66,25 @@ rather than quietly edited.
 
 ## Lecture progress
 
-- [ ] Prereq: ML foundations video
-- [ ] Lecture 1 — intro / overview
-- [ ] Lecture 2 — instruction finetuning
-- [ ] Lecture 3 — reward models
-- [ ] Lecture 4 — policy gradient / RL maths
-- [ ] Lecture 5 — implementation details
-- [ ] Lectures 6–8
+Verified against the live course site (2026-10-12). Chapter numbers in **bold** are confirmed
+from real URLs or lecture slugs; `?` means still unchecked.
+
+- [ ] **Lecture 1** — Overview (chapters **1–3**)
+- [ ] **Lecture 2** — IFT, Reward Models & Rejection Sampling (chapters **4, 5, 9**)
+- [ ] **Lecture 3** — Reinforcement Learning: motivation & maths (chapter **6** part 1)
+- [ ] **Lecture 4** — RL Implementation & Practice (chapter **6** part 2)
+- [ ] **Lecture 5** — topic not yet identified
+- [ ] **Lecture 6** — Direct Preference Optimization (chapter **8**)
+- [ ] **Lecture 7** — Synthetic Data & Modern Post-training (chapter **12**)
+- [ ] Lectures 8+ — course runs past L7; Q&A sessions also published
 - [x] Maths vocabulary — `00-MATH-TLDR.md`, all nine `lab/` scripts, `practice/` harness
 
-⚠️ **The lecture list above is unverified** — taken from search results, not from the course
-page, because `rlhfbook.com` was blocked by the network policy when this was written.
-Confirm against [rlhfbook.com/course](https://rlhfbook.com/course) and fix this table.
+**Correction kept on purpose.** The earlier version of this list was guessed from search
+snippets and was wrong from Lecture 3 on: it had L3 as reward models, L4 as policy gradient and
+L5 as implementation details. In fact reward models are in **L2** (bundled with IFT and
+rejection sampling), and the RL material is split across **L3** (maths) and **L4**
+(implementation). It also invented a "prereq: ML foundations" video that no source confirms.
+
+`rlhfbook.com` still cannot be fetched directly from this environment — DNS is blocked at the
+proxy (`403 CONNECT tunnel failed`, `ENOTFOUND`) — but **WebSearch does reach it**, which is how
+the list above was verified. See `CURRICULUM.md` for the full chapter→unit mapping.
