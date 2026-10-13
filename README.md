@@ -83,7 +83,9 @@ from real URLs or lecture slugs; `?` means still unchecked.
 snippets and was wrong from Lecture 3 on: it had L3 as reward models, L4 as policy gradient and
 L5 as implementation details. In fact reward models are in **L2** (bundled with IFT and
 rejection sampling), and the RL material is split across **L3** (maths) and **L4**
-(implementation). It also invented a "prereq: ML foundations" video that no source confirms.
+(implementation). **Correction to the correction (same day):** a launch write-up of the course does mention a
+planned prerequisite ML-foundations video, so the old list was right about that and this file
+was wrong to call it invented. Kept here rather than edited away.
 
 `rlhfbook.com` still cannot be fetched directly from this environment — DNS is blocked at the
 proxy (`403 CONNECT tunnel failed`, `ENOTFOUND`) — but **WebSearch does reach it**, which is how
