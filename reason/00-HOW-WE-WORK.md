@@ -71,6 +71,19 @@ Added 2026-10-12, at your request.
 
 Both are now required fields in the `CURRICULUM.md` unit template.
 
+
+## Standing instructions — do not re-litigate these
+
+Set 2026-10-13. Claude has no memory between sessions, so these live here.
+
+- **Commits are always authored `maskedband1t <anurag.akkiraju@gmail.com>`.** Never
+  `Claude <noreply@anthropic.com>`. Run
+  `git config user.name maskedband1t && git config user.email anurag.akkiraju@gmail.com`
+  at the start of a session. The repo's stop hook will flag these as "Unverified" and GitHub
+  will show that badge — that is accepted and expected. Do not amend to a Claude author to
+  satisfy the hook. `Co-Authored-By: Claude` in the message body is fine.
+- **Always push.** No asking. This container is ephemeral; unpushed work dies with the session.
+
 ## Starting a new session
 
 I don't carry memory between sessions. To get me up to speed in one line, paste:
