@@ -9,6 +9,30 @@ means I'm not predicting hard enough.
 
 ---
 
+### 2026-10-13 · over-optimization, before running `lab/10` — **Claude's miss, not yours**
+*Logged in my column, per the working agreement: a number I read you that turns out wrong is a
+MISS the same as one of yours.*
+
+**Predicted:** I wrote into the script's own narration that the reader's true quality would
+*"peak early, then fall off a cliff"* as optimisation pressure rose.
+
+**Actual:** It climbed the whole way — `−0.20 → +0.57 → +0.90 → +1.20 → +1.31 → +1.43` — and
+only dipped at 4096 candidates. No cliff.
+
+**Score:** MISS.
+
+**Learned (and it's a better lesson than the one I meant to teach):** Goodhart needs **a ceiling
+on real quality and no ceiling on the gameable feature.** With substance drawn unbounded, hard
+optimisation keeps finding genuinely better answers faster than it accumulates padding, so
+quality rises. Cap substance at 1.0 — realistic, since there is a limit to how good a reply can
+be — and it becomes a catastrophe: peak at 4 candidates, then `−0.26, −1.26, −2.57, −4.03,
+−5.74`, while the reward model reports steady improvement the entire time.
+
+So "optimise a proxy hard and it breaks" is not quite right. The sharper claim: **a proxy breaks
+when the thing you want saturates and the thing it mismeasures does not.**
+
+---
+
 ### 2026-10-12 · entropy & loss for `[3,1,0]`, before running `lab/04` and `lab/05`
 *Reasoned aloud on a phone; scribed by Claude, wording checked back.*
 
