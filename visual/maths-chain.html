@@ -266,6 +266,23 @@ ul{margin:0 0 14px;padding-left:20px}li{margin-bottom:6px}
   <p><b>Entropy cannot detect that.</b> It has one input and reality isn't it. Only comparing stated confidence against measured outcomes can — which is this chart, and nothing else.</p></div>
 </section>
 
+<!-- 10 -->
+<section id="s10" hidden>
+  <span class="kicker">reference</span><h2>Six anchors</h2>
+  <p>You never need to calculate anything. You need these six facts <b>memorised</b>, the way you know 7×8 — then every "up or down, a little or a lot" question is doable in your head.</p>
+  <figure class="panel flush"><svg viewBox="0 0 320 262" id="fig10a" role="img" aria-label="Six facts to memorise, with the bit cost of common beliefs"></svg></figure>
+  <h3>And the length question, answered</h3>
+  <p>A 10-word answer at 50% belief per word costs <b>10 bits</b>. Twenty words costs <b>20 bits</b>. Just counting — one bit per coin flip.</p>
+  <figure class="panel flush"><svg viewBox="0 0 320 150" id="fig10b" role="img" aria-label="A longer answer always scores lower, which does not make it worse"></svg>
+  <figcaption>Same quality per word. The longer one scores twice as badly.</figcaption></figure>
+  <div class="trap"><h3>So is the 20-word answer worse?</h3>
+  <p><b>No.</b> Every word you add is another negative number added to the pile, so <b>a longer answer can never beat a shorter one</b> on raw score — no matter how good it is.</p>
+  <p>The number measures <em>how surprising this exact string was</em>, not <em>how good the answer is</em>. Those are different questions, and the formula only knows the first.</p>
+  <p>Which is why real systems <b>divide by the length</b>. Without it, every model trained this way learns the same lesson: say as little as possible.</p></div>
+  <h3>What's actually asked of you</h3>
+  <p>Direction and rough size. Never arithmetic. "Entropy goes down, and by a lot" is a complete, correct answer — no calculator, no decimals.</p>
+</section>
+
 <div class="nav">
   <button id="back" type="button">Back</button>
   <button id="next" type="button" class="go">Next</button>
@@ -274,7 +291,7 @@ ul{margin:0 0 14px;padding-left:20px}li{margin-bottom:6px}
 
 <script>
 (function(){
-var N=10, cur=0;
+var N=11, cur=0;
 var css=function(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()};
 var SV='http://www.w3.org/2000/svg';
 function E(t,a){var e=document.createElementNS(SV,t);for(var k in a)e.setAttribute(k,a[k]);return e}
@@ -559,7 +576,46 @@ function f9(){var s=clr('fig9'),x0=42,y0=168,w=248,h=138;
  s.appendChild(T(x0+0.9*w-5,y0-0.78*h+3,'the gap',mono(8.5,css('--cost'),'end')));
 }
 
-var draws=[chain,f1,f2,f3,f4,f5,f6,f7,f8,f9];
+/* ---- 10 anchors ---- */
+function f10(){
+ var s=clr('fig10a'),B=css('--belief'),C=css('--cost'),M=css('--muted'),I=css('--ink'),L=css('--line');
+ var rows=[
+  ['A 50/50 choice','1 bit','one coin flip of doubt'],
+  ['Every halving','+1 bit','4 options = 2, 8 = 3, 1024 = 10'],
+  ['Totally certain','0 bits','no doubt, nothing to pay'],
+  ['Belief → zero','→ ∞ bits','the cliff. never say impossible'],
+  ['n words at 50%','n bits','just counting'],
+  ['Beliefs match reality','KL = 0','the floor, and you cannot beat it']
+ ];
+ rows.forEach(function(r,i){var y=14+i*34;
+  s.appendChild(E('rect',{x:0,y:y,width:320,height:28,rx:5,
+    fill:i%2?'none':css('--bg'),opacity:i%2?0:.7}));
+  s.appendChild(T(8,y+13,r[0],mono(11,I)));
+  s.appendChild(T(8,y+24,r[2],mono(8.5,M)));
+  s.appendChild(T(312,y+18,r[1],mono(13,i===3?C:B,'end')));
+ });
+ var y0=224;
+ s.appendChild(T(8,y0,'the bit cost of a belief, worth a glance',mono(9,M)));
+ var pts=[[0.9,'90%'],[0.5,'50%'],[0.25,'25%'],[0.1,'10%'],[0.01,'1%']];
+ pts.forEach(function(q,i){var x=14+i*62, b=-Math.log2(q[0]);
+  var h=Math.min(b,7)/7*22;
+  s.appendChild(E('rect',{x:x,y:256-h,width:34,height:h,rx:2,fill:C,opacity:.85}));
+  s.appendChild(T(x+17,250-h,b.toFixed(1),mono(9.5,I,'middle')));
+  s.appendChild(T(x+17,261,q[1],mono(9,M,'middle')));
+ });
+
+ s=clr('fig10b');
+ var dat=[[10,'10 words'],[20,'20 words']];
+ dat.forEach(function(d,i){var y=26+i*52, w=d[0]/20*210;
+  s.appendChild(T(8,y+16,d[1],mono(11,I)));
+  s.appendChild(E('rect',{x:78,y:y,width:w,height:24,rx:3,fill:C,opacity:.85}));
+  s.appendChild(T(78+w+6,y+16,'−'+d[0]+' bits',mono(11,C)));
+  s.appendChild(T(84,y+16,'50% × '+d[0],mono(9.5,'#fff')));
+ });
+ s.appendChild(T(8,132,'identical quality per word — the longer one just has more words in it',mono(9,M)));
+}
+
+var draws=[chain,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10];
 
 /* ---- stepper ---- */
 var dots=document.getElementById('dots');

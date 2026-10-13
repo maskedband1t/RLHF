@@ -12,6 +12,15 @@ Rewritten as we go. When a session reveals how a concept lands, the unit changes
 - **Everything ties back to language models.** A concept that stays abstract hasn't landed.
 - **Definitions get restated.** No unit assumes the previous one is still loaded in your head.
 
+**Format, by default:** schoolbook. Visual, worked example, plain words, one thing at a time.
+Not a paper, not a reference sheet, not a wall of markdown. Assume the textbook treatment every
+time unless asked otherwise.
+
+**What is asked of you, precisely:** *direction and rough size.* Never arithmetic. "Entropy goes
+down, and by a lot" is a complete and correct answer. Claude computes; you predict. The six
+anchor facts (screen 10 of the visual walkthrough) are the only things worth memorising, and
+with them every direction question is doable in your head.
+
 **And one on pacing:** one concept per screen, in dependency order, with a visible position in
 the sequence. Jumping between points — however related they are — is the failure mode to avoid.
 
