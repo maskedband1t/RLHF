@@ -158,6 +158,37 @@ cover their prerequisites. The one real gap on that path is unit 08.
 
 ---
 
+## Adjacent reading that earned its place
+
+**"Neural Networks Are Already Clean"** — Nick Cammarata, Goodfire. An informal research
+essay (stated confidence ~85%) arguing that polysemanticity in early model organisms was
+misread: not superposition, but *recursive generalization* — a neuron starting on one thing and
+branching along related facets. The canonical cat/car neuron is a **V-shape** neuron; pointed
+fires it, round pushes it negative. InceptionV1's last layer went from ~0–5% interpretable
+neurons to **99–100%** with only residual connections and LayerNorm added, at identical
+parameter count and data — so it was an ordinary learning failure, not a second learning
+principle.
+
+Three reasons it belongs in this curriculum, all honest rather than stretched:
+
+1. **A real-world instance of unit 15 (`lab/10`).** The essay's own term for why the microscope
+   misled the field is *"feature visualization reward hacking"* — the visualiser optimises to
+   raise a neuron's activation, finds the cat route in, and drags whiskers along for the ride.
+   An optimiser taking a path to a high score that misses the thing you wanted. Goodhart, in
+   the instrument, for five years, with a theory then built on the artifact.
+2. **A real-world instance of unit 14b (`lab/12`).** The field was confident and wrong in a
+   place nobody had a reason to check. Same shape as a reward model at distance 4.0.
+3. **It is this repo's own method at field scale.** The section "A History of Microscope
+   Errors" keeps the wrong claim, names where and with whom it was made, and corrects it in
+   public — which is `lab/08`'s honest correction and the MISS column of
+   `notes/PREDICTIONS.md`, with five years of a research field as the stakes.
+
+Status to keep in mind: a working hypothesis, not a paper. It has not been shown that every
+case of heavy polysemanticity is recursive generalization, and the training-checkpoint evidence
+comes from smaller models, since large LMs' checkpoints are not available.
+
+---
+
 ## Where things live
 
 | file | role |
