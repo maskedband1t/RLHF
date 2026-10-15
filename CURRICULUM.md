@@ -183,9 +183,46 @@ Three reasons it belongs in this curriculum, all honest rather than stretched:
    public — which is `lab/08`'s honest correction and the MISS column of
    `notes/PREDICTIONS.md`, with five years of a research field as the stakes.
 
-Status to keep in mind: a working hypothesis, not a paper. It has not been shown that every
-case of heavy polysemanticity is recursive generalization, and the training-checkpoint evidence
-comes from smaller models, since large LMs' checkpoints are not available.
+**CORRECTION, kept rather than edited away.** The paragraph above originally ended here with
+*"a working hypothesis, not a paper... striking anecdotes"* and a verdict that it was far from
+established. That judgment was formed after reading **~15,000 of 274,000 characters — about 5%**
+— and it materially understated the work. Anurag pushed back with *"I think it's instead us who
+haven't ingested this fully,"* which was correct. What a fuller read turned up:
+
+- **A pre-registered falsification test.** 200 random neurons; an agent reads only the written
+  explanation, never the neuron, and writes five examples that should fire it and five near
+  misses that shouldn't — *then* they measure. New examples fired strongly **76%**, near misses
+  **11%**; the explanation won 164, tied 15, **lost 4**. Guess before result, with the losses
+  reported. This repo's own method, at scale.
+- **"Blind maximum."** One agent explains a neuron; a second, seeing only that explanation,
+  writes a sentence that fires it **harder than any example found in 10 billion tokens.**
+- **A direct quantitative test against a specific superposition mechanism.** If features hide
+  across many neurons' weak activations, you could not remove the **weakest 75%** of activations
+  for a 72%→71% accuracy cost — while removing the **strongest 7%** (same total activation mass)
+  costs 72%→**4%**. What is lost is fine distinctions the model already confused, arriving from
+  semantically related neurons.
+- **Circuit racing.** A blank 7.1M model reaches 48–50% alone and **~2%** trained alongside a
+  pretrained twin that takes 93–97% of marginal credit. The "head start dominates" mechanism,
+  made falsifiable — and with it **a theory of generalization** (broad features win from the
+  first step, per Arpit 2017 and coherent gradients), which may matter more than the
+  interpretability claim.
+- **The definitional asymmetry.** The dominant formulation of superposition — *Toy Models*'
+  "more features than dimensions" — is a claim about a count nobody can define or measure.
+  Recursive generalization predicts a specific shape in semantic space and in training time.
+
+Revised position: **if it survives independent attack, a leading candidate for the most
+important interpretability result so far.** What genuinely remains open — and the author says it
+himself, at a stated 85%: no independent replication yet (*"I would update strongly on even one
+convincing example"*), and the developmental evidence needs training checkpoints that do not
+exist for frontier models.
+
+**The methodological lesson, which is why this correction stays in the file.** The essay reports
+that the one prior framing closest to its own view is blocked to AI readers: it opens with a
+large base64-embedded image, and every agent web reader they tried hit its length limit before
+the argument began. Claude then read 5% of this essay and produced a calibrated-sounding
+verdict. That is `lab/12` landing on the reader — the judge confident and wrong in a place
+nobody checked — and it is now logged as learning pattern 11: **a skim plus a hedge is not
+epistemics.** Read the evidence sections before grading the claim.
 
 ---
 
